@@ -14,6 +14,7 @@ from ten import (
     Data,
 )
 import json
+import aiohttp
 from typing import Any
 from ten_ai_base.llm_tool import AsyncLLMToolBaseExtension
 from ten_ai_base.types import LLMToolMetadata, LLMToolMetadataParameter, LLMToolResult
@@ -39,8 +40,14 @@ TOOL_PARAMETERS = {
 
 
 class HelloWorldExtension(AsyncLLMToolBaseExtension):
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+        self.session = None
+        self.ten_env = None
+
     async def on_init(self, ten_env: AsyncTenEnv) -> None:
         ten_env.log_debug("on_init")
+        self.session = aiohttp.ClientSession()
 
     async def on_start(self, ten_env: AsyncTenEnv) -> None:
         ten_env.log_debug("on_start")
@@ -105,10 +112,23 @@ class HelloWorldExtension(AsyncLLMToolBaseExtension):
     async def run_tool(self, ten_env: AsyncTenEnv, name: str, args: dict) -> LLMToolResult:
         ten_env.log_info(f"run_tool name: {name}, args: {args}")
         #  result = await self._get_current_weather(args)
-        result = {
-            "location": "Nagpur",
-            "temperature": "14.1",
-            "humidity": "88",
-            "wind_speed": "8.3",
-        }
-        return {"content": json.dumps(result)}
+
+        try:
+            location = args["location"]
+            url = f"http://host.docker.internal:8081?q={location}"
+
+            async with self.session.get(url) as response:
+                result = await response.json()
+                return {"content": json.dumps(result)}
+
+        except Exception as e:
+            self.ten_env.log_error(f"Failed to get current weather: {e}")
+            return None
+
+        # result = {
+        #     "location": "Nagpur",
+        #     "temperature": "14.1",
+        #     "humidity": "88",
+        #     "wind_speed": "8.3",
+        # }
+        # return {"content": json.dumps(result)}

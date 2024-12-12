@@ -73,12 +73,9 @@
           },
           {
             "type": "extension",
-            "name": "weatherapi_tool_python",
-            "addon": "weatherapi_tool_python",
-            "extension_group": "default",
-            "property": {
-              "api_key": "${env:WEATHERAPI_API_KEY}"
-            }
+            "name": "hello_world",
+            "addon": "hello_world",
+            "extension_group": "default"
           }
         ],
         "connections": [
@@ -148,7 +145,7 @@
                 "dest": [
                   {
                     "extension_group": "default",
-                    "extension": "weatherapi_tool_python"
+                    "extension": "hello_world"
                   }
                 ]
               }
@@ -238,7 +235,7 @@
           },
           {
             "extension_group": "default",
-            "extension": "weatherapi_tool_python",
+            "extension": "hello_world",
             "cmd": [
               {
                 "name": "tool_register",
